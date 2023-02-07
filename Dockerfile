@@ -27,4 +27,7 @@ RUN chmod +x entrypoint-spark.sh
 
 COPY src .
 
-USER 1001
+RUN mkdir /usr/src/data
+RUN chmod -R 777 /usr/src/data
+
+#USER 1001

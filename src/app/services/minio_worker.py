@@ -8,9 +8,10 @@ def create_client():
     print('Getting minio client.')
     try:
         client = Minio(
-            "play.min.io",
+            "localhost:9000",
             access_key="jIvqJRDwSrF9ovDo",
-            secret_key="c2XIqaN5cO4TLpsQMCeTDOpm9xjv3sbb"
+            secret_key="c2XIqaN5cO4TLpsQMCeTDOpm9xjv3sbb",
+            secure=False
         )
         return client
     except S3Error as exc:
@@ -26,12 +27,24 @@ def upload_data(data):
         print("Creating bucket")
         client.make_bucket("stock-quotes")
 
-    data = str(data)
-    result = client.put_object(
-        "stock-quotes", "my-object", io.BytesIO(bytes(data)), len(data),
-        metadata={"My-Project": "one"},
-    )
+    print('Putting data')
+
+    # data = str(data)
+    # result = client.put_object(
+    #     "stock-quotes", "stock-quotes-object", io.BytesIO(bytes(data, 'utf-8')), len(data),
+    #     metadata={"Quotes_project": "one"},
+    # )
+
+    # result = client.put_object(
+    #     "stock-quotes", "stock-quotes-object",
+    # )
+    return "Data was successfully uploaded"
+
+
+def get_data():
+    print('Starting get data from minio.')
+    client = create_client()
 
 
 if __name__ == '__main__':
-    upload_data('12234')
+    pass
