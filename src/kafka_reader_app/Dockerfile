@@ -25,7 +25,7 @@ RUN pip install -r requirements.txt
 COPY entrypoint-spark.sh .
 RUN chmod +x entrypoint-spark.sh
 
-COPY src .
+COPY src/kafka_reader_app .
 
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data
