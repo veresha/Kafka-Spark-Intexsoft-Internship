@@ -18,14 +18,12 @@ spark = (SparkSession
 
 df_from_minio = (spark
                  .read
-                 .option("header", "true")
                  .option("interSchema", "true")
                  .option('subscribe', 'quotes')
-                 .parquet("s3a://stock-quotes/data")
-                 .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)"))
+                 .parquet("s3a://stock-quotes/data"))
 
 df_from_minio.registerTempTable("quotes")
 df2 = spark.sql("select * from quotes")
 
-print(df2.show())
+print(df2.show(truncate=False))
 
