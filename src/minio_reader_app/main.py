@@ -27,3 +27,14 @@ df2 = spark.sql("select * from quotes")
 
 print(df2.show(truncate=False))
 
+(df2.write
+ .format("jdbc")
+ .option('driver', 'com.github.housepower.jdbc.ClickHouseDriver')
+ .option('url', 'jdbc:clickhouse://127.0.0.1:8123')
+ .option('user', 'default')
+ .option('password', '')
+ .option('dbtable', 'quotes')
+ # .option('truncate', 'true')
+ # .option('batchsize', 10000)
+ # .option('isolationLevel', 'NONE')
+ .save())

@@ -47,6 +47,7 @@ services:
       - default
     volumes:
       - ./data:/usr/src/data
+#    command: ["spark-submit",  "--master", "spark://spark-kafka:7077", "/usr/src/main.py"]
 
   spark-worker:
     build:
@@ -90,6 +91,7 @@ services:
       - default
     volumes:
       - ./data:/usr/src/data
+    command: ["spark-submit", "/usr/src/main.py"]
 
   minio:
     image: 'bitnami/minio:latest'
@@ -108,5 +110,7 @@ services:
     container_name: clickhouse
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '8123:8123'
     networks:
       - default
