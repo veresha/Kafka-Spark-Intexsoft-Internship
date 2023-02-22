@@ -30,4 +30,6 @@ COPY src/minio_reader_app .
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data
 
+COPY clickhouse-jdbc-0.3.2-patch11-all.jar .
+
 #USER 1001

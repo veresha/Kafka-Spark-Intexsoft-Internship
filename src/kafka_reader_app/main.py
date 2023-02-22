@@ -28,8 +28,6 @@ spark = (SparkSession
 sc = spark.sparkContext
 sc.setLogLevel("WARN")
 
-# schema = spark.read.json(map(lambda x: json.loads(x), ))
-
 kafka_data = (spark.read
               .format('kafka')
               .option('kafka.bootstrap.servers', 'kafka:9092')

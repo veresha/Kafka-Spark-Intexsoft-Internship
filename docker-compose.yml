@@ -42,7 +42,6 @@ services:
     ports:
       - '8080:8080'
       - '7077:7077'
-#    entrypoint: ./entrypoint-spark.sh
     networks:
       - default
     volumes:
@@ -91,7 +90,7 @@ services:
       - default
     volumes:
       - ./data:/usr/src/data
-    command: ["spark-submit", "/usr/src/main.py"]
+    command: ["spark-submit", "--jars", "/usr/src/clickhouse-jdbc-0.3.2-patch11-all.jar", "/usr/src/main.py"]
 
   minio:
     image: 'bitnami/minio:latest'
@@ -109,8 +108,12 @@ services:
     image: bitnami/clickhouse:latest
     container_name: clickhouse
     environment:
+      - CLICKHOUSE_ADMIN_USER=default
       - ALLOW_EMPTY_PASSWORD=yes
+      - CLICKHOUSE_HTTP_PORT=8123
+#      - CLICKHOUSE_TCP_PORT=9003
     ports:
       - '8123:8123'
+#      - '9000:9000'
     networks:
       - default
