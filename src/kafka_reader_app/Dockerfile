@@ -22,12 +22,13 @@ RUN ./install_packages.sh
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY entrypoint-spark.sh .
-RUN chmod +x entrypoint-spark.sh
+COPY entrypoint-spark-kafka.sh .
+RUN chmod +x entrypoint-spark-kafka.sh
+
+COPY entrypoint-clickhouse.sh .
+RUN chmod +x entrypoint-clickhouse.sh
 
 COPY src/kafka_reader_app .
 
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data
-
-#USER 1001

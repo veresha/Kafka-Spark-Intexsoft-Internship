@@ -1,54 +1,50 @@
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
-from datetime import datetime, timedelta
-
-from df_processing import df_division_by_time, get_statistic_data, df_division_by_company
-
-minio_conf_lict = [
-    ("fs.s3a.endpoint", 'http://minio:9000'),
-    ("fs.s3a.access.key", 'minio-root-user'),
-    ("fs.s3a.secret.key", 'minio-root-password'),
-    ("fs.s3a.path.style.access", "true")]
+from pyspark.sql.functions import window, avg, max, min, count
+from config import minio_conf_lict, MINIO_BUCKET_NAME, MINIO_BUCKET_PATH, CLICKHOUSE_JARS, CLICKHOUSE_DRIVER, \
+    CLICKHOUSE_URL, CLICKHOUSE_DB_NAME
 
 conf = SparkConf().setAll(minio_conf_lict)
 
 spark = (SparkSession
          .builder
          .appName('minio-reader-app')
-         .config("spark.jars", "/usr/src/clickhouse-jdbc-0.3.2-patch11-all.jar")
+         .config("spark.jars", CLICKHOUSE_JARS)
          .config(conf=conf)
          .getOrCreate())
 
 df_from_minio = (spark
                  .read
                  .option("interSchema", "true")
-                 .option('subscribe', 'quotes')
-                 .parquet("s3a://stock-quotes/data"))
+                 .option('subscribe', MINIO_BUCKET_NAME)
+                 .parquet(MINIO_BUCKET_PATH))
 
 df_from_minio.registerTempTable("quotes")
 df = spark.sql("select * from quotes").orderBy('date')
-print(df.show(truncate=False))
-
-companies_dfs_list = df_division_by_company(df)
-
-interval = 6
-for df in companies_dfs_list:
-    dfs_list = df_division_by_time(df, interval)
-
-    for df2 in dfs_list:
-        df2.show()
-        statistic_data = get_statistic_data(df2)
-        statistic_data.show()
-        # then write to clickhouse
 
 
+w = df.groupBy("company", window("date", "2 minutes")).agg(
+    avg("quote").alias("avg"),
+    max("quote").alias("max"),
+    min("quote").alias("min"),
+    count("quote").alias("records_count"))
 
-# (df2.write
-#  .format("jdbc")
-#  .mode("append")
-#  .option('driver', 'com.clickhouse.jdbc.ClickHouseDriver')
-#  .option('url', 'jdbc:clickhouse://clickhouse:8123')
-#  .option('user', 'default')
-#  .option('password', '')
-#  .option('dbtable', 'quotes')
-#  .save())
+df = (w.select('company',
+               w.window.start.cast('string').alias('period_start'),
+               "records_count",
+               "avg",
+               "max",
+               "min")
+      .orderBy('company', 'period_start'))
+
+df.show(truncate=False)
+
+(df.write
+ .format("jdbc")
+ .mode("append")
+ .option('driver', CLICKHOUSE_DRIVER)
+ .option('url', CLICKHOUSE_URL)
+ .option('user', 'default')
+ .option('password', '')
+ .option('dbtable', CLICKHOUSE_DB_NAME)
+ .save())

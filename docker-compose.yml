@@ -47,6 +47,7 @@ services:
     volumes:
       - ./data:/usr/src/data
 #    command: ["spark-submit",  "--master", "spark://spark-kafka:7077", "/usr/src/main.py"]
+#    command: ["sh", "entrypoint-spark-kafka.sh"]
 
   spark-worker:
     build:
@@ -90,7 +91,7 @@ services:
       - default
     volumes:
       - ./data:/usr/src/data
-    command: ["spark-submit", "--jars", "/usr/src/clickhouse-jdbc-0.3.2-patch11-all.jar", "/usr/src/main.py"]
+    command: ["sh", "entrypoint-spark-minio.sh"]
 
   minio:
     image: 'bitnami/minio:latest'
@@ -111,9 +112,8 @@ services:
       - CLICKHOUSE_ADMIN_USER=default
       - ALLOW_EMPTY_PASSWORD=yes
       - CLICKHOUSE_HTTP_PORT=8123
-#      - CLICKHOUSE_TCP_PORT=9003
     ports:
       - '8123:8123'
-#      - '9000:9000'
     networks:
       - default
+#    entrypoint: ./entrypoint-clickhouse.sh

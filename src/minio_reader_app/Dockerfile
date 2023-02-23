@@ -22,14 +22,16 @@ RUN ./install_packages.sh
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY entrypoint-spark.sh .
-RUN chmod +x entrypoint-spark.sh
+COPY entrypoint-spark-minio.sh .
+RUN chmod +x entrypoint-spark-minio.sh
+
+COPY entrypoint-clickhouse.sh .
+RUN chmod +x entrypoint-clickhouse.sh
+
+COPY clickhouse-jdbc-0.3.2-patch11-all.jar .
 
 COPY src/minio_reader_app .
 
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data
 
-COPY clickhouse-jdbc-0.3.2-patch11-all.jar .
-
-#USER 1001

@@ -1,21 +1,7 @@
-import json
-
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
-from pyspark.sql.functions import from_json, col, get_json_object
-from pyspark.sql.types import StructType, StructField, StringType, FloatType
-
-
-minio_conf_lict = [
-    ("fs.s3a.endpoint", 'http://minio:9000'),
-    ("fs.s3a.access.key", 'minio-root-user'),
-    ("fs.s3a.secret.key", 'minio-root-password'),
-    ("fs.s3a.path.style.access", "true")]
-
-manual_schema = StructType([
-    StructField('company', StringType(), True),
-    StructField('quote', FloatType(), True),
-    StructField('date', StringType(), True)])
+from pyspark.sql.functions import from_json, col
+from config import minio_conf_lict, KAFKA_SERVER, MINIO_BUCKET_PATH, KAFKA_TOPIC
 
 conf = SparkConf().setAll(minio_conf_lict)
 
@@ -30,10 +16,11 @@ sc.setLogLevel("WARN")
 
 kafka_data = (spark.read
               .format('kafka')
-              .option('kafka.bootstrap.servers', 'kafka:9092')
-              .option('subscribe', 'quotes')
+              .option('kafka.bootstrap.servers', KAFKA_SERVER)
+              .option('subscribe', KAFKA_TOPIC)
               .load()
               .select(col('value').cast("string")).alias('schema').select(col('schema.*')).first())
+
 
 kafka_dict = kafka_data.asDict().get('value')
 schema = spark.read.json(sc.parallelize([kafka_dict])).schema
@@ -41,8 +28,8 @@ schema = spark.read.json(sc.parallelize([kafka_dict])).schema
 df_from_kafka = (spark
                  .readStream
                  .format('kafka')
-                 .option('kafka.bootstrap.servers', 'kafka:9092')
-                 .option('subscribe', 'quotes')
+                 .option('kafka.bootstrap.servers', KAFKA_SERVER)
+                 .option('subscribe', KAFKA_TOPIC)
                  .load()
                  .select(from_json(col("value").cast("string"), schema=schema)
                          .alias("parsed_value"))
@@ -54,9 +41,9 @@ df_from_kafka = (spark
  .writeStream
  .format("parquet")
  .option("maxPartitionBytes", 256 * 1024 * 1024)
- .option("path", f"s3a://stock-quotes/data")
- .option("checkpointLocation", f"s3a://stock-quotes/data/checkpoints")
- .partitionBy('date')
+ .option("path", MINIO_BUCKET_PATH)
+ .option("checkpointLocation", f"{MINIO_BUCKET_PATH}/checkpoints")
+ .partitionBy(['company', 'date'])
  .start()
  .awaitTermination())
 
