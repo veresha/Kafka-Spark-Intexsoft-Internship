@@ -72,6 +72,29 @@ services:
     volumes:
       - ./data:/usr/src/data
 
+  minio:
+    image: 'bitnami/minio:latest'
+    container_name: minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+    networks:
+      - default
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        /usr/bin/mc alias set myminio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+        /usr/bin/mc mb myminio/${MINIO_BUCKET_NAME};
+        /usr/bin/mc policy set public myminio/${MINIO_BUCKET_NAME};
+        exit 0;"
+
   spark-minio:
     build:
       context: .
@@ -93,17 +116,6 @@ services:
       - ./data:/usr/src/data
     command: ["sh", "entrypoint-spark-minio.sh"]
 
-  minio:
-    image: 'bitnami/minio:latest'
-    container_name: minio
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    environment:
-      - MINIO_ROOT_USER=minio-root-user
-      - MINIO_ROOT_PASSWORD=minio-root-password
-    networks:
-      - default
 
   clickhouse:
     image: bitnami/clickhouse:latest
@@ -116,4 +128,6 @@ services:
       - '8123:8123'
     networks:
       - default
-#    entrypoint: ./entrypoint-clickhouse.sh
+    volumes:
+      - ./entrypoint-clickhouse.sh:/docker-entrypoint-initdb.d/entrypoint-clickhouse.sh
+

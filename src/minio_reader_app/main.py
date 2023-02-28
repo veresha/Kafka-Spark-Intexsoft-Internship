@@ -23,7 +23,7 @@ df_from_minio.registerTempTable("quotes")
 df = spark.sql("select * from quotes").orderBy('date')
 
 
-w = df.groupBy("company", window("date", "2 minutes")).agg(
+w = df.groupBy("company", window("date", "3 minutes")).agg(
     avg("quote").alias("avg"),
     max("quote").alias("max"),
     min("quote").alias("min"),

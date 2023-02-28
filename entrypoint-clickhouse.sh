@@ -2,7 +2,7 @@
 
 clickhouse-client -q "CREATE DATABASE IF NOT EXISTS quotes-db"
 
-clickhouse-client -q "CREATE TABLE IF NOT EXISTS quotes(
+clickhouse-client -q "CREATE TABLE IF NOT EXISTS quotes-db.quotes(
   company String,
   period_start DateTime,
   records_count UInt32,
