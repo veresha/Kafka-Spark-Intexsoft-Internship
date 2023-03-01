@@ -1,8 +1,8 @@
 #! /bin/sh
 
-clickhouse-client -q "CREATE DATABASE IF NOT EXISTS quotes-db"
+clickhouse-client -q "CREATE DATABASE IF NOT EXISTS $CLICKHOUSE_DB_NAME"
 
-clickhouse-client -q "CREATE TABLE IF NOT EXISTS quotes-db.quotes(
+clickhouse-client -q "CREATE TABLE IF NOT EXISTS $CLICKHOUSE_DB_NAME.$CLICKHOUSE_TABLE_NAME(
   company String,
   period_start DateTime,
   records_count UInt32,

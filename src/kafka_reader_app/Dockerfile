@@ -29,3 +29,7 @@ COPY src/kafka_reader_app .
 
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data
+
+#USER 1001
+
+#ENTRYPOINT ["sh", "entrypoint-spark-kafka.sh"]

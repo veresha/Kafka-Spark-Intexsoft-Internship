@@ -44,9 +44,13 @@ services:
       - '7077:7077'
     networks:
       - default
+    depends_on:
+      - minio
     volumes:
       - ./data:/usr/src/data
-#    command: ["spark-submit",  "--master", "spark://spark-kafka:7077", "/usr/src/main.py"]
+#    entrypoint: sh
+#    command:
+#      '-c "spark-submit --master spark://spark-kafka:7077 /usr/src/main.py"'
 #    command: ["sh", "entrypoint-spark-kafka.sh"]
 
   spark-worker:
@@ -114,8 +118,10 @@ services:
       - default
     volumes:
       - ./data:/usr/src/data
+    depends_on:
+      - clickhouse
+      - minio
     command: ["sh", "entrypoint-spark-minio.sh"]
-
 
   clickhouse:
     image: bitnami/clickhouse:latest
@@ -128,6 +134,8 @@ services:
       - '8123:8123'
     networks:
       - default
+    env_file:
+      - .env
     volumes:
+      - ./entrypoint-clickhouse.sh:/docker-entrypoint-startdb.d/entrypoint-clickhouse.sh
       - ./entrypoint-clickhouse.sh:/docker-entrypoint-initdb.d/entrypoint-clickhouse.sh
-
