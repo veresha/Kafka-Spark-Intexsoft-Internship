@@ -1,5 +1,6 @@
 import os
 
+APP_NAME = 'minio-reader-app'
 
 MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'http://minio:9000')
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minio-root-user')
@@ -12,7 +13,10 @@ CLICKHOUSE_DRIVER = os.getenv('CLICKHOUSE_DRIVER', 'com.clickhouse.jdbc.ClickHou
 CLICKHOUSE_URL = os.getenv('CLICKHOUSE_URL', 'jdbc:clickhouse://clickhouse:8123')
 CLICKHOUSE_DB_NAME = os.getenv('CLICKHOUSE_DB_NAME', 'quotesDB')
 CLICKHOUSE_TABLE_NAME = os.getenv('CLICKHOUSE_TABLE_NAME', 'quotes')
+CLICKHOUSE_USER = os.getenv('CLICKHOUSE_USER', 'default')
+CLICKHOUSE_PASS = os.getenv('CLICKHOUSE_PASS', '')
 
+AGGREGATION_PERIOD = os.getenv('AGGREGATION_PERIOD', '5 days')
 
 minio_conf_lict = [
     ("fs.s3a.endpoint", MINIO_ENDPOINT),

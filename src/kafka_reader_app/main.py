@@ -1,42 +1,49 @@
-from pyspark.sql import SparkSession
+import pyspark.sql.functions as f
 from pyspark.conf import SparkConf
-from pyspark.sql.functions import from_json, col
+from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.types import StructType
+
 import config as c
 
 
-conf = SparkConf().setAll(c.minio_conf_lict)
-
-spark = (SparkSession
-         .builder
-         .appName('kafka-reader-app')
-         .config(conf=conf)
-         .getOrCreate())
-
-sc = spark.sparkContext
-sc.setLogLevel("WARN")
-
-kafka_data = (spark.read
-              .format('kafka')
-              .option('kafka.bootstrap.servers', c.KAFKA_SERVER)
-              .option('subscribe', c.KAFKA_TOPIC)
-              .load()
-              .select(col('value').cast("string")).alias('schema').select(col('schema.*')).first())
+def get_schema(spark_session: SparkSession) -> StructType:
+    sc = spark_session.sparkContext
+    sc.setLogLevel("WARN")
+    kafka_data = (spark_session.read
+                  .format('kafka')
+                  .option('kafka.bootstrap.servers', c.KAFKA_SERVER)
+                  .option('subscribe', c.KAFKA_TOPIC)
+                  .load()
+                  .select(f.col('value').cast("string")).alias('schema')
+                  .select(f.col('schema.*')).first())
+    kafka_dict = kafka_data.asDict().get('value')
+    schema = spark_session.read.json(sc.parallelize([kafka_dict])).schema
+    return schema
 
 
-kafka_dict = kafka_data.asDict().get('value')
-schema = spark.read.json(sc.parallelize([kafka_dict])).schema
+def get_spark() -> SparkSession:
+    conf = SparkConf().setAll(c.minio_conf_lict)
+    spark = (SparkSession
+             .builder
+             .appName(c.APP_NAME)
+             .config(conf=conf)
+             .getOrCreate())
+    return spark
 
-df_from_kafka = (spark
-                 .readStream
-                 .format('kafka')
-                 .option('kafka.bootstrap.servers', c.KAFKA_SERVER)
-                 .option('subscribe', c.KAFKA_TOPIC)
-                 .load()
-                 .select(from_json(col("value").cast("string"), schema=schema)
-                         .alias("parsed_value"))
-                 .select(col("parsed_value.*")))
 
-(df_from_kafka
+def get_df_from_kafka() -> DataFrame:
+    return (get_spark()
+            .readStream
+            .format('kafka')
+            .option('kafka.bootstrap.servers', c.KAFKA_SERVER)
+            .option('subscribe', c.KAFKA_TOPIC)
+            .load()
+            .select(f.from_json(f.col("value").cast("string"), schema=get_schema(get_spark()))
+                    .alias("parsed_value"))
+            .select(f.col("parsed_value.*")))
+
+
+(get_df_from_kafka()
  .writeStream
  .format("parquet")
  .option("maxPartitionBytes", 256 * 1024 * 1024)
@@ -45,6 +52,3 @@ df_from_kafka = (spark
  .partitionBy(['company', 'date'])
  .start()
  .awaitTermination())
-
-
-

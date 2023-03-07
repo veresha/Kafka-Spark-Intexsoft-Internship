@@ -8,10 +8,10 @@ services:
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
-    ports:
-      - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
 
   kafka:
     image: bitnami/kafka:latest
@@ -48,10 +48,6 @@ services:
       - minio
     volumes:
       - ./data:/usr/src/data
-#    entrypoint: sh
-#    command:
-#      '-c "spark-submit --master spark://spark-kafka:7077 /usr/src/main.py"'
-#    command: ["sh", "entrypoint-spark-kafka.sh"]
 
   spark-worker:
     build:
@@ -83,8 +79,8 @@ services:
       - '9000:9000'
       - '9001:9001'
     environment:
-      - MINIO_ROOT_USER=minio-root-user
-      - MINIO_ROOT_PASSWORD=minio-root-password
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
     networks:
       - default
 
@@ -137,5 +133,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./entrypoint-clickhouse.sh:/docker-entrypoint-startdb.d/entrypoint-clickhouse.sh
       - ./entrypoint-clickhouse.sh:/docker-entrypoint-initdb.d/entrypoint-clickhouse.sh
+      - ./entrypoint-clickhouse.sh:/docker-entrypoint-startdb.d/entrypoint-clickhouse.sh

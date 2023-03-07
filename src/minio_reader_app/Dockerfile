@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/spark:3.3
+FROM docker.io/bitnami/spark:3.3 as base
 
 ENV SPARK_RPC_AUTHENTICATION_ENABLED no
 ENV SPARK_RPC_ENCRYPTION_ENABLED no
@@ -11,24 +11,25 @@ RUN apt-get update \
     && apt-get -y install netcat gcc libpq-dev zip curl  \
     && apt-get clean
 
-RUN mkdir /usr/checkpoints
-RUN chmod -R 777 /usr/checkpoints
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 WORKDIR /usr/src
 
+COPY clickhouse-jdbc-0.3.2-patch11-all.jar .
+
+FROM base AS app
+
+RUN mkdir /usr/checkpoints
+RUN chmod -R 777 /usr/checkpoints
+
 COPY install_packages.sh packages.txt ./
 RUN ./install_packages.sh
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
 COPY entrypoint-spark-minio.sh .
 RUN chmod +x entrypoint-spark-minio.sh
 
 COPY entrypoint-clickhouse.sh .
-RUN chmod +x entrypoint-clickhouse.sh
-
-COPY clickhouse-jdbc-0.3.2-patch11-all.jar .
 
 COPY src/minio_reader_app .
 

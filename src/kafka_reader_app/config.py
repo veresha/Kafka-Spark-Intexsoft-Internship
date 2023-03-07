@@ -1,5 +1,6 @@
 import os
 
+APP_NAME = 'kafka-reader-app'
 
 KAFKA_SERVER = os.getenv('KAFKA_SERVER', 'kafka:9092')
 KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'quotes')
