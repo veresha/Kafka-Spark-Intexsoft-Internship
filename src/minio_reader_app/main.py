@@ -20,8 +20,8 @@ def get_df_from_minio() -> DataFrame:
     return (get_spark()
             .read
             .option("interSchema", "true")
-            .option('subscribe', c.MINIO_BUCKET_NAME)
-            .parquet(c.MINIO_BUCKET_PATH))
+            .option('subscribe', c.MINIO_DATA_BUCKET_NAME)
+            .parquet(f's3a://{c.MINIO_DATA_BUCKET_NAME}'))
 
 
 def aggregate_data() -> DataFrame:
@@ -46,12 +46,13 @@ def aggregate_data() -> DataFrame:
     return df
 
 
-(aggregate_data().write
- .format("jdbc")
- .mode("append")
- .option('driver', c.CLICKHOUSE_DRIVER)
- .option('url', c.CLICKHOUSE_URL)
- .option('user', c.CLICKHOUSE_USER)
- .option('password', c.CLICKHOUSE_PASS)
- .option('dbtable', f'{c.CLICKHOUSE_DB_NAME}.{c.CLICKHOUSE_TABLE_NAME}')
- .save())
+def push_data_to_clickhouse():
+    (aggregate_data().write
+     .format("jdbc")
+     .mode("append")
+     .option('driver', c.CLICKHOUSE_DRIVER)
+     .option('url', c.CLICKHOUSE_URL)
+     .option('user', c.CLICKHOUSE_USER)
+     .option('password', c.CLICKHOUSE_PASS)
+     .option('dbtable', f'{c.CLICKHOUSE_DB_NAME}.{c.CLICKHOUSE_TABLE_NAME}')
+     .save())

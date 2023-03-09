@@ -91,8 +91,10 @@ services:
     entrypoint: >
       /bin/sh -c "
         /usr/bin/mc alias set myminio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
-        /usr/bin/mc mb myminio/${MINIO_BUCKET_NAME};
-        /usr/bin/mc policy set public myminio/${MINIO_BUCKET_NAME};
+        /usr/bin/mc mb myminio/${MINIO_DATA_BUCKET_NAME};
+        /usr/bin/mc policy set public myminio/${MINIO_DATA_BUCKET_NAME};
+        /usr/bin/mc mb myminio/${MINIO_CHECKPOINTS_BUCKET_NAME};
+        /usr/bin/mc policy set public myminio/${MINIO_CHECKPOINTS_BUCKET_NAME};
         exit 0;"
 
   spark-minio:
@@ -117,7 +119,7 @@ services:
     depends_on:
       - clickhouse
       - minio
-    command: ["sh", "entrypoint-spark-minio.sh"]
+    command: [ "sh", "entrypoint-spark-minio.sh" ]
 
   clickhouse:
     image: bitnami/clickhouse:latest

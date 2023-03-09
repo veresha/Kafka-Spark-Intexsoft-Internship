@@ -43,12 +43,13 @@ def get_df_from_kafka() -> DataFrame:
             .select(f.col("parsed_value.*")))
 
 
-(get_df_from_kafka()
- .writeStream
- .format("parquet")
- .option("maxPartitionBytes", 256 * 1024 * 1024)
- .option("path", c.MINIO_BUCKET_PATH)
- .option("checkpointLocation", f"{c.MINIO_BUCKET_PATH}/checkpoints")
- .partitionBy(['company', 'date'])
- .start()
- .awaitTermination())
+def push_data_to_minio():
+    (get_df_from_kafka()
+     .writeStream
+     .format("parquet")
+     .option("maxPartitionBytes", 256 * 1024 * 1024)
+     .option("path", f's3a://{c.MINIO_DATA_BUCKET_NAME}')
+     .option("checkpointLocation", f's3a://{c.MINIO_CHECKPOINTS_BUCKET_NAME}')
+     .partitionBy(['company', 'date'])
+     .start()
+     .awaitTermination())
