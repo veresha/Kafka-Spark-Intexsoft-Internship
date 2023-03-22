@@ -21,4 +21,5 @@ minio_conf_lict = [
     ("fs.s3a.endpoint", MINIO_ENDPOINT),
     ("fs.s3a.access.key", MINIO_ACCESS_KEY),
     ("fs.s3a.secret.key", MINIO_SECRET_KEY),
-    ("fs.s3a.path.style.access", "true")]
+    ("fs.s3a.path.style.access", "true"),
+    ("spark.jars", CLICKHOUSE_JARS)]

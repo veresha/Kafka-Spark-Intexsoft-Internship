@@ -31,6 +31,8 @@ RUN chmod +x entrypoint-spark-minio.sh
 
 COPY entrypoint-clickhouse.sh .
 
+COPY src/spark_instance.py .
+
 COPY src/minio_reader_app .
 
 RUN mkdir /usr/src/data

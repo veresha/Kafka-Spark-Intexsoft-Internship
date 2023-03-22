@@ -26,5 +26,7 @@ RUN ./install_packages.sh
 
 COPY src/kafka_reader_app .
 
+COPY src/spark_instance.py .
+
 RUN mkdir /usr/src/data
 RUN chmod -R 777 /usr/src/data

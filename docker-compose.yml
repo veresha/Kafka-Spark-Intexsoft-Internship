@@ -135,5 +135,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./entrypoint-clickhouse.sh:/docker-entrypoint-initdb.d/entrypoint-clickhouse.sh
       - ./entrypoint-clickhouse.sh:/docker-entrypoint-startdb.d/entrypoint-clickhouse.sh
+      - ./entrypoint-clickhouse.sh:/docker-entrypoint-initdb.d/entrypoint-clickhouse.sh
