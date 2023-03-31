@@ -1,6 +1,6 @@
 # **Kafka-Spark-Intexsoft-Internship** 
-It's a second part of ***ETL-pipeline*** application for collection and aggregation Stock Quotes.
-First part: <https://github.com/veresha/Stock-Quotes-Intexsoft-Internship>
+It's a second part of ***ETL-pipeline*** application for collection and aggregation Stock Quotes data.
+First part: <https://github.com/veresha/Stock-Quotes-Intexsoft-Internship>.
 ***
 ##App include:
 - **kafka_reader_app** - read Kafka topic, format data to Spark Dataframe, send data to Minio
